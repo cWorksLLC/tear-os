@@ -13,7 +13,7 @@ osname = "TearOS beta 1.0"
 print("welcome to " + osname + "!")
 print("type 'help' for a list of commands!")
 
-while 1==1:
+while True:
 	#the command script
 	print("What to run?")
 	cmd = input()
