@@ -1,5 +1,5 @@
 # 1: TearOS
-![The Logo]((https://github.com/cWorksLLC/tear-os/blob/main/tear-logo.png)
+![The Logo](https://github.com/cWorksLLC/tear-os/blob/main/tear-logo.png)
 ## 1.1: About
 ### 1.1.1: in English
 TearOS is an Operating System written in Python wich is currently in development.
