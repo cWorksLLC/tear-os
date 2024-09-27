@@ -8,7 +8,7 @@ chour = time.strftime("%H:")
 cminute = time.strftime("%M:")
 csecond = time.strftime("%S ")
 osname = "TearOS beta 1.2"
-dir = home
+dir = "home"
 #the variables (important i swear)
 
 print("welcome to the login script!")
@@ -44,21 +44,22 @@ while True:
 		supass = input("what is your password?")
 		if supass == password:
 			print("sucess!")
-			username = root # or anything else the username for TearOS superuser would be.
-			dir = root
+			username = "root" # or anything else the username for TearOS superuser would be.
+			dir = "root"
 		else:
 			print("wrong.")
 		
 		#commands after the first one must be written with an "elif"
 		#statement. the commands end at the "else" mentioned here:
-	elif cmd=="changedir"
+	
+	elif cmd=="changedir":
 		print("changedir usage: changedir --dirname")
-	elif cmd=="changedir --root"
+	elif cmd=="changedir --root":
 		print("root")
-		dir = root
-	elif cmd=="changedir --home"
+		dir = "root"
+	elif cmd=="changedir --home":
 		print("home")
-		dir = home
+		dir = "home"
 	else:
 		print("not a valid command.")
 #end
