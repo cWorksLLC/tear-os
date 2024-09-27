@@ -1,4 +1,4 @@
-#TearOS beta 1.1
+#TearOS beta 1.2
 
 import time
 from datetime import date
@@ -7,7 +7,7 @@ today = date.today()
 chour = time.strftime("%H:")
 cminute = time.strftime("%M:")
 csecond = time.strftime("%S ")
-osname = "TearOS beta 1.1"
+osname = "TearOS beta 1.2"
 #the variables (important i swear)
 
 print("welcome to the login script!")
