@@ -28,6 +28,7 @@ while True:
 		print("time - Tells the time")
 		print("date - Tells the current date")
 		print("sysinfo - Tells the system information")
+		print("su - Switches to Superuser")
 	
 	elif cmd=="time":
 		print(chour + cminute + csecond)
@@ -37,6 +38,13 @@ while True:
 
 	elif cmd=="sysinfo":
 		 print(osname + " is registered to: " + username)
+
+	elif cmd=="su":
+		supass = input("what is your password?")
+		if supass == password:
+			print("sucess!")
+		else:
+			print("wrong.")
 		
 		#commands after the first one must be written with an "elif"
 		#statement. the commands end at the "else" mentioned here:
