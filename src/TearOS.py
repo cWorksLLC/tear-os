@@ -1,16 +1,35 @@
 #TearOS beta 1.3
 
 import time
-from datetime import date
+from datetime import datetime, date
+import pytz
 
+# Time zone selection
+def choose_timezone():
+    print("Please choose your time zone:")
+    timezones = pytz.all_timezones
+    for i, tz in enumerate(timezones):
+        print(f"{i + 1}. {tz}")
+    while True:
+        choice = input("Enter the number corresponding to your time zone: ")
+        try:
+            tz_index = int(choice) - 1
+            if 0 <= tz_index < len(timezones):
+                return timezones[tz_index]
+            else:
+                print("Invalid choice. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+#the variables (important i swear)
 today = date.today()
 chour = time.strftime("%H:")
 cminute = time.strftime("%M:")
 csecond = time.strftime("%S ")
 osname = "TearOS beta 1.3"
 dir = "home"
-#the variables (important i swear)
 
+# setting vars
 print("welcome to the login script!")
 username = input("what is your name? ")
 password = input("what is your password? ")
