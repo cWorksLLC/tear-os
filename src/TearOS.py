@@ -38,7 +38,7 @@ while True:
 		print(str(today.day) + "." + str(today.month) + "." + str(today.year))
 
 	elif cmd=="sysinfo":
-		 print(osname + " is registered to: " + username)
+		 print(osname + " this software copy is registered to: " + username)
 
 	elif cmd=="su":
 		supass = input("what is your password?")
