@@ -1,4 +1,5 @@
 #TearOS beta 1.3
+# bug fixes needed
 
 import time
 from datetime import datetime, date
