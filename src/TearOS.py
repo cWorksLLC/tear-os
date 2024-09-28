@@ -50,8 +50,9 @@ while True:
 		print("su - Switches to Superuser")
 		print("changedir - params: --dirname - switches directory's")
 	
-	elif cmd=="time":
-		print(chour + cminute + csecond)
+	elif cmd == "time":
+		current_time = datetime.now(user_tz).strftime("%H:%M:%S")
+	        print(f"The current time is {current_time}")
 		
 	elif cmd=="date":
 		print(str(today.day) + "." + str(today.month) + "." + str(today.year))
