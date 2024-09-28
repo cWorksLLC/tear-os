@@ -1,4 +1,4 @@
-#TearOS beta 1.2
+#TearOS beta 1.3
 
 import time
 from datetime import date
@@ -7,7 +7,7 @@ today = date.today()
 chour = time.strftime("%H:")
 cminute = time.strftime("%M:")
 csecond = time.strftime("%S ")
-osname = "TearOS beta 1.2"
+osname = "TearOS beta 1.3"
 dir = "home"
 #the variables (important i swear)
 
