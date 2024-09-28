@@ -55,7 +55,7 @@ while True:
 	        print(f"The current time is {current_time}")
 		
 	elif cmd=="date":
-		print(str(today.day) + "." + str(today.month) + "." + str(today.year))
+        	print(f"{today.day}.{today.month}.{today.year}")
 
 	elif cmd=="sysinfo":
 		 print(osname + " this software copy is registered to: " + username)
