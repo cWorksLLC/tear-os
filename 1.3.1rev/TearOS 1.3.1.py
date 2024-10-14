@@ -4,7 +4,8 @@ import pytz
 import json
 import calendar
 import os
-
+import threading
+import queue
 # --- File System ---
 file_system = {
     "root": {
@@ -216,6 +217,31 @@ def choose_timezone():
                 print("Invalid choice. Please enter a number from the list.")
         except ValueError:
             print("Invalid input. Please enter a number.")
+        def get_input(queue):
+         while True:
+            try:
+                choice = int(input("Enter the number of your time zone: "))
+                queue.put(choice)
+                break
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+
+    # Create a queue to communicate between threads
+    input_queue = queue.Queue()
+
+    # Start a separate thread to get user input
+    input_thread = threading.Thread(target=get_input, args=(input_queue,))
+    input_thread.daemon = True  # Allow main thread to exit even if input thread is running
+    input_thread.start()
+    
+    while True:
+        if not input_queue.empty():
+            choice = input_queue.get()
+            if 1 <= choice <= len(timezones):
+                return timezones[choice - 1]
+            else:
+                print("Invalid choice. Please enter a number from the list.")
+        time.sleep(0.1)  # Avoid busy-waiting
 
 def get_current_time():
     if user_tz:
