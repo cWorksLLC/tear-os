@@ -285,7 +285,7 @@ def main():
                 user_data[username + "_timezone"] = user_tz.zone  # Store time zone
                 save_user_data(user_data)
                 print(f"Account created successfully, {username}!")
-                break
+                
         else:
             print("Invalid choice.")
 
@@ -327,10 +327,10 @@ def main():
             run_app(command)
         elif command == "exit":
             print("Exiting TearOS...")
-            break
+            
         elif command == "logout":
             print("Logging out...")
-            break
+            
         else:
             print("Invalid command.")
         
