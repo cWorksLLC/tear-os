@@ -275,11 +275,27 @@ def main():
                 print(f"Welcome back, {username}!")
                 user_tz = pytz.timezone(user_data.get(username + "_timezone", "UTC"))
                 logged_in = True # Set flag to True to exit loop
+                break
+            elif username in user_data:
+                print("Incorrect password.")
+
             else:
                 print("Invalid username or password.")
         elif choice == "2":
-            # ... (your account creation logic)
-            logged_in = True # Set flag to True after account creation
+            username = input("New Username: ")
+            password = input("New Password: ")
+            if username in user_data:
+                print("Username already exists.")
+            else:
+                user_data[username] = password
+                user_tz = pytz.timezone(choose_timezone())
+                user_data[username + "_timezone"] = user_tz.zone  # Store time zone
+                save_user_data(user_data)
+                print(f"Account created successfully, {username}!")
+                logged_in = True # Set flag to True after account creation
+                break # Exit the loop after successful account creation
+
+            
         else:
             print("Invalid choice.")
 
@@ -287,7 +303,7 @@ def main():
     print(f"Welcome to {osname}!, {username}!")
     print("Type 'help' for a list of commands!")
 
-    # ... (rest of your main OS loop)
+    
 
 
     # MAIN OS LOOP (This loop was missing)
