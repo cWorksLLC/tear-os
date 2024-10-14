@@ -283,8 +283,11 @@ def run_app(app_name):
         print("App not found.")
 
 # --- Main OS Loop ---
+# ... (rest of your code)
+
+# --- Main OS Loop ---
 def main():
-    global username, dir, user_tz
+    global username, dir, user_tz  # user_tz is not used anymore
     user_data = load_user_data()
 
     logged_in = False # Flag to track login status
@@ -299,7 +302,6 @@ def main():
             password = input("Password: ")
             if username in user_data and user_data[username] == password:
                 print(f"Welcome back, {username}!")
-                user_tz = pytz.timezone(user_data.get(username + "_timezone", "UTC"))
                 logged_in = True # Set flag to True to exit loop
                 break
             elif username in user_data:
@@ -314,8 +316,9 @@ def main():
                 print("Username already exists.")
             else:
                 user_data[username] = password
-                user_tz = pytz.timezone(choose_timezone())
-                user_data[username + "_timezone"] = user_tz.zone  # Store time zone
+                # --- Time zone removed ---
+                # user_tz = pytz.timezone(choose_timezone())
+                # user_data[username + "_timezone"] = user_tz.zone  # Store time zone
                 save_user_data(user_data)
                 print(f"Account created successfully, {username}!")
                 logged_in = True # Set flag to True after account creation
