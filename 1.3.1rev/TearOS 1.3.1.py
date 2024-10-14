@@ -272,7 +272,6 @@ def main():
             if username in user_data and user_data[username] == password:
                 print(f"Welcome back, {username}!")
                 user_tz = pytz.timezone(user_data.get(username + "_timezone", "UTC"))
-                break
             else:
                 print("Invalid username or password.")
         elif choice == "2":
