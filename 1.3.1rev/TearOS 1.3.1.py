@@ -272,6 +272,7 @@ def main():
             if username in user_data and user_data[username] == password:
                 print(f"Welcome back, {username}!")
                 user_tz = pytz.timezone(user_data.get(username + "_timezone", "UTC"))
+                break # Exit the login/signup loop
             else:
                 print("Invalid username or password.")
         elif choice == "2":
@@ -285,7 +286,7 @@ def main():
                 user_data[username + "_timezone"] = user_tz.zone  # Store time zone
                 save_user_data(user_data)
                 print(f"Account created successfully, {username}!")
-                
+                break # Exit the login/signup loop
         else:
             print("Invalid choice.")
 
@@ -294,11 +295,11 @@ def main():
 
     current_dir = [default_dir]  # Start in the home directory
 
-    while True:
+    # MAIN OS LOOP (This loop was missing)
+    while True: 
         prompt = f"{username}@{osname}:{'/'.join(current_dir)} $"
         prompt = f"\033[32m{prompt}\033[0m"  # Apply green color and reset
 
-        
         command = input(prompt)
 
         if command == "help":
@@ -327,12 +328,13 @@ def main():
             run_app(command)
         elif command == "exit":
             print("Exiting TearOS...")
-            
+            break # Exit the OS loop
         elif command == "logout":
             print("Logging out...")
-            
+            break # Exit the OS loop, going back to login/signup
         else:
             print("Invalid command.")
         
 if __name__ == "__main__":
     main()
+
