@@ -1,9 +1,12 @@
-# 1: TearOS
+# 1: TearOS 1.3.1
 ![The Logo](https://github.com/cWorksLLC/tear-os/blob/main/tear-logo.png)
-## 1.1: About
-### 1.1.1: in English
-TearOS is an Operating System written in Python wich is currently in development.
-### 1.1.2: in Russian / на Русском
-TearOS это Операцонная Система написана на Python которая ещё в разработке
-## 1.2: How to Use TearOS
-The OS is in the "src" folder, named "TearOS.py". if you want to download it, click "Code" and then click "download ZIP".
+## The changes made
+Made apps built-in, user data save in a json (and inside the py file) and added options to login script like:
+1. Login
+2. Create a Account
+
+##Did the line that says your username and your directory changed?
+ Yes, it changed to {username}@TearOS beta 1.3.1:home $
+
+## Flaws
+ fixed the ending session flaw when launching it in python, not in a IDE
