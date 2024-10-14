@@ -261,7 +261,9 @@ def main():
     global username, dir, user_tz
     user_data = load_user_data()
 
-    while True:
+    logged_in = False # Flag to track login status
+
+    while not logged_in: # Loop until successful login
         print("1. Login")
         print("2. Create New Account")
         choice = input("Enter your choice: ")
@@ -272,28 +274,21 @@ def main():
             if username in user_data and user_data[username] == password:
                 print(f"Welcome back, {username}!")
                 user_tz = pytz.timezone(user_data.get(username + "_timezone", "UTC"))
-                break # Exit the login/signup loop
+                logged_in = True # Set flag to True to exit loop
             else:
                 print("Invalid username or password.")
         elif choice == "2":
-            username = input("New Username: ")
-            password = input("New Password: ")
-            if username in user_data:
-                print("Username already exists.")
-            else:
-                user_data[username] = password
-                user_tz = pytz.timezone(choose_timezone())
-                user_data[username + "_timezone"] = user_tz.zone  # Store time zone
-                save_user_data(user_data)
-                print(f"Account created successfully, {username}!")
-                break # Exit the login/signup loop
+            # ... (your account creation logic)
+            logged_in = True # Set flag to True after account creation
         else:
             print("Invalid choice.")
 
+    # This part will only execute after successful login or account creation
     print(f"Welcome to {osname}!, {username}!")
     print("Type 'help' for a list of commands!")
 
-    current_dir = [default_dir]  # Start in the home directory
+    # ... (rest of your main OS loop)
+
 
     # MAIN OS LOOP (This loop was missing)
     while True: 
