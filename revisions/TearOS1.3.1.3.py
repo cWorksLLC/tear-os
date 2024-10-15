@@ -11,6 +11,39 @@ import requests
 import shutil
 import subprocess
 import sys
+import psutil
+
+# --- Command History ---
+command_history = []
+command_history_list = []
+
+# --- Configuration ---
+GITHUB_REPO = "https://api.github.com/repos/Alejandrix2456github/tear-os-apps-extras/contents/tearOS/apps"
+APPS_DIR = "/tearOS/apps"
+FILE_SYSTEM_DATA_FILE = "file_system_data.json"  # File to store file system data
+SETTINGS_FILE = "tearOS_settings.json"
+
+# --- Command History ---
+def command_history(command):
+    """Adds a command to the command history."""
+    global command_history_list  # Use the new list variable name
+    command_history_list.append(command)
+    if len(command_history_list) > 10:
+        command_history_list.pop(0)
+
+
+# ... other imports ...
+
+def list_running_processes():
+    """Lists currently running processes."""
+    print("Running Processes:")
+    for process in psutil.process_iter():  # Use psutil.process_iter()
+        try:
+            process_info = process.as_dict(attrs=['pid', 'name', 'username'])
+            print(f"PID: {process_info['pid']}, Name: {process_info['name']}, User: {process_info['username']}")
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass  # Ignore processes that cannot be accessed
+
 
 
 # Theme Change function
@@ -39,7 +72,7 @@ themes = {
 }
 
 # --- Configuration ---
-
+GITHUB_REPO = "https://api.github.com/repos/Alejandrix2456github/tear-os-apps-extras/contents/tearOS/apps"
 APPS_DIR = "/tearOS/apps"
 FILE_SYSTEM_DATA_FILE = "file_system_data.json"  # File to store file system data
 SETTINGS_FILE = "tearOS_settings.json"
@@ -161,7 +194,7 @@ def save_user_data(user_data):
         json.dump(user_data, f)
 
 # --- Global Settings ---
-osname = "TearOS beta 1.3.1.2"
+osname = "TearOS beta 1.3.1.3"
 default_dir = "home"
 user_tz = None  # Will be set during login
 
@@ -302,8 +335,15 @@ apps = {
 
 # --- Functions to list, install, and update apps ---
 def list_available_apps():
-    pass
-    print("tearOS 1.3 series has stopped recieving support.....go to 1.4...")
+    try:
+        response = requests.get(GITHUB_REPO)
+        response.raise_for_status()
+        apps_data = response.json()
+        print("Available Apps:")
+        for app in apps_data:
+            print(f"- {app['name']}: {app.get('description', 'No description available')}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching app data: {e}")
 
 def extract_app(app_package_path):
     """Installs a .tear app package to the APPS_DIR."""
@@ -333,9 +373,25 @@ def extract_app(app_package_path):
 
 
 def download_app():  # Renamed function
-    pass
-    print("installing apps isnt supported anymore for 1.3 series...")
+    app_name = input("Enter the name of the app to install: ")
+    try:
+        response = requests.get(f"{GITHUB_REPO}/{app_name}")
+        response.raise_for_status()
+        app_data = response.json()
+        download_url = app_data['download_url']
 
+        # Download the app
+        response = requests.get(download_url)
+        response.raise_for_status()
+        with open(f"{app_name}.tear", "wb") as f:
+            f.write(response.content)
+        print(f"App '{app_name}' downloaded successfully!")
+
+        # Extract the app using the correct function
+        extract_app(f"{app_name}.tear") 
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error installing app: {e}")
 
 def update_apps():
     print("Updating apps...")
@@ -430,7 +486,6 @@ def run_app(app_name):
             entry_point = app_info.get("entry_point")
             if not entry_point:
                 print("Error: App does not specify an entry point.")
-                return
 
             app_process = subprocess.Popen(
                 ["python", os.path.join(app_dir, entry_point)],
@@ -557,6 +612,11 @@ def main():
                 print("Invalid command. Usage: cd [directory]")
         elif command == "time":
             print(get_current_time())
+        elif command == "history":
+            for i, cmd in enumerate(command_history_list):
+                print(f"{i+1}. {cmd}")
+        elif command == "tasks":  # Add a basic task manager command
+            list_running_processes()    
         elif command == "date":
             print(get_current_date())
         elif command == "apps":

@@ -1,4 +1,3 @@
-import random
 import time
 from datetime import datetime, date
 import pytz
@@ -12,81 +11,29 @@ import shutil
 import subprocess
 import sys
 
-
-# Theme Change function
-def change_theme(theme_name):
-    global current_theme
-    if theme_name in themes:
-        current_theme = theme_name
-        print(f"Theme changed to '{theme_name}'.")
-    else:
-        print(f"Invalid theme: '{theme_name}'. Available themes are: {', '.join(themes.keys())}")
-
-# Theme Class
-class Theme:
-    def __init__(self, prompt_color, dir_color, text_color):
-        self.prompt_color = prompt_color
-        self.dir_color = dir_color
-        self.text_color = text_color
-
-# Theme Dictionary
-themes = {
-    "default": Theme("\033[32m", "\033[34m", "\033[0m"),  # Green prompt, blue dir, reset text
-    "sunset": Theme("\033[33m", "\033[31m", "\033[0m"),  # Orange prompt, red dir, reset text
-    "matrix": Theme("\033[32m", "\033[37m", "\033[0m"),  # Green prompt, white dir, reset text
-    "pinker": Theme("\033[35m", "\033[38;5;206m", "\033[0m"), # Pink prompt, light pink dir, reset text
-    "blue_ocean": Theme("\033[34m", "\033[36m", "\033[0m"),  # Blue prompt, cyan dir, reset text
-}
-
 # --- Configuration ---
-
-APPS_DIR = "/tearOS/apps"
-FILE_SYSTEM_DATA_FILE = "file_system_data.json"  # File to store file system data
-SETTINGS_FILE = "tearOS_settings.json"
-
-# --- Load/Save Settings ---
-def load_settings():
-    try:
-        with open(SETTINGS_FILE, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {"run_mode": "built-in"}  # Default to running built-in apps directly
-
-def save_settings(settings):
-    with open(SETTINGS_FILE, "w") as f:
-        json.dump(settings, f, indent=4)
+GITHUB_REPO = "https://api.github.com/repos/your-username/tear-os/contents/apps"
+APPS_DIR = "/tearOS/apps" 
 
 # --- File System ---
-def load_file_system():
-    """Loads the file system data from the data file."""
-    try:
-        with open(FILE_SYSTEM_DATA_FILE, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {  # Return the default file system if the file is not found
-            "root": {
-                "home": {
-                    "user": {
-                        "documents": {},
-                        "downloads": {},
-                        "pictures": {},
-                        "music": {},
-                        "myfile.txt": "This is the content of my file."
-                    }
-                },
-                "bin": {},
-                "etc": {},
-                "tearApps": {}
+file_system = {
+    "root": {
+        "home": {
+            "user": {
+                "documents": {},
+                "downloads": {},
+                "pictures": {},
+                "music": {},
+                "myfile.txt": "This is the content of my file."
             }
-        }
+        },
+        "bin": {},  # For system binaries (you can add commands here later)
+        "etc": {},  # For system configuration files
+        "tearApps": {}
+    }
+}
 
-def save_file_system():
-    """Saves the current file system data to the data file."""
-    with open(FILE_SYSTEM_DATA_FILE, "w") as f:
-        json.dump(file_system, f, indent=4)  # Use indent for readability
 
-# Load the file system at startup
-file_system = load_file_system()
 
 current_dir = ["root", "home", "user"]  # Start in the user directory
 
@@ -111,6 +58,57 @@ def change_directory(new_dir):
             temp_dir = temp_dir[d]
         current_dir.append(new_dir)
 
+def install_app(app_package_path):
+    """Installs a .tear app package to the APPS_DIR."""
+
+    if not app_package_path.endswith(".tear"):
+        print("Error: Invalid app package format. Must end with '.tear'")
+        return
+
+    try:
+        app_name = os.path.basename(app_package_path).replace(".tear", "")
+        target_dir = os.path.join(APPS_DIR, app_name)
+
+        # Check for existing installation
+        if os.path.exists(target_dir):
+            print(f"Error: An app named '{app_name}' is already installed.")
+            return
+
+        # Extract the .tear package
+        shutil.unpack_archive(app_package_path, target_dir) 
+
+        print(f"App '{app_name}' installed successfully!")
+
+    except Exception as e:
+        print(f"Error installing app: {e}")
+
+def run_app(app_name):
+    """Runs a .tear app."""
+    app_dir = os.path.join(APPS_DIR, app_name)
+    app_info_path = os.path.join(app_dir, "app_info.json")
+
+    try:
+        with open(app_info_path, "r") as f:
+            app_info = json.load(f)
+
+        entry_point = app_info.get("entry_point")
+        if not entry_point:
+            print("Error: App does not specify an entry point.")
+            return
+
+        # Run the app's Python script in a separate process
+        app_process = subprocess.Popen(
+            ["python", os.path.join(app_dir, entry_point)],
+            cwd=app_dir  # Set the app's directory as the working directory
+        )
+
+    except (FileNotFoundError, json.JSONDecodeError, subprocess.CalledProcessError) as e:
+        print(f"Error running app: {e}")
+
+# Example usage:
+install_app("MyGame.tear")
+run_app("MyGame") 
+
 # --- File Management Commands ---
 def make_directory(dir_name):
     global current_dir
@@ -122,7 +120,6 @@ def make_directory(dir_name):
     else:
         temp_dir[dir_name] = {}
         print(f"Directory '{dir_name}' created.")
-        save_file_system()  # Save the file system after creating the directory
 
 def create_file(file_name):
     global current_dir
@@ -134,8 +131,6 @@ def create_file(file_name):
     else:
         temp_dir[file_name] = ""
         print(f"File '{file_name}' created.")
-        save_file_system()  # Save the file system after creating the file
-
 
 def remove(item_name):
     global current_dir
@@ -161,7 +156,7 @@ def save_user_data(user_data):
         json.dump(user_data, f)
 
 # --- Global Settings ---
-osname = "TearOS beta 1.3.1.2"
+osname = "TearOS beta 1.3.1"
 default_dir = "home"
 user_tz = None  # Will be set during login
 
@@ -197,21 +192,13 @@ def app_calculator():
                 print(num1 + num2)
             elif op == "-":
                 print(num1 - num2)
-            elif op == "*":
-                print(num1 * num2)
-            elif op == "/":
-                if num2 == 0:
-                    print("Cannot divide by zero.")
-                else:
-                    print(num1 / num2)
-            else:
-                print("Invalid operator.")
+            # ... (rest of the calculator code remains the same)
         except ValueError:
             print("Invalid input. Please enter numbers only.")
 
 def app_guessing_game():
     print("Number Guessing Game")
-    secret_number = random.randint(1, 100)
+    secret_number = 42  # You can change this to any number
     guesses_left = 5
     while guesses_left > 0:
         try:
@@ -229,13 +216,12 @@ def app_guessing_game():
     if guesses_left == 0:
         print(f"You ran out of guesses. The number was {secret_number}.")
 
-def app_text_editor(filename=None):
+def app_text_editor():
     print("Simple Text Editor")
-    if filename is None:
-        filename = input("Enter filename: ")
+    filename = input("Enter filename: ")
     try:
         # Get the full path based on the current directory
-        filepath = os.path.join(*current_dir, filename)
+        filepath = "/".join(current_dir) + "/" + filename
 
         with open(filepath, "a+") as f:
             print("Enter text (type ':q' to quit):")
@@ -247,7 +233,6 @@ def app_text_editor(filename=None):
         print(f"File '{filename}' saved.")
     except Exception as e:
         print(f"Error: {e}")
-
 def app_calendar():
     print("Calendar App")
     while True:
@@ -274,91 +259,80 @@ def app_store():
         if choice == "1":
             list_available_apps()
         elif choice == "2":
-            download_app()
+            install_app()
         elif choice == "3":
             update_apps()
         elif choice == "4":
             break
         else:
             print("Invalid choice.")
-            
 
+# ... (other code)
 
-
-# --- Create app instances ---
+# Create app instances
 calculator = App("calculator", "A simple calculator", "calculator", app_calculator)
 guessing_game = App("guess", "Number guessing game", "guess", app_guessing_game)
 text_editor = App("editor", "A simple text editor", "editor [filename]", app_text_editor)
 calendar_app = App("calendar", "Displays a calendar", "calendar", app_calendar)
 app_store = App("appstore", "TearOS App Store", "appstore", app_store)
 
-apps = {
+
+apps = {  # Define the apps dictionary here
     calculator.name: calculator,
     guessing_game.name: guessing_game,
     text_editor.name: text_editor,
-    calendar_app.name: calendar_app,
-    app_store.name: app_store
+    calendar_app.name: calendar_app
 }
 
-# --- Functions to list, install, and update apps ---
+
+
 def list_available_apps():
-    pass
-    print("tearOS 1.3 series has stopped recieving support.....go to 1.4...")
-
-def extract_app(app_package_path):
-    """Installs a .tear app package to the APPS_DIR."""
-
-    if not app_package_path.endswith(".tear"):
-        print("Error: Invalid app package format. Must end with '.tear'")
-        return
-
-    try:
-        app_name = os.path.basename(app_package_path).replace(".tear", "")
-        target_dir = os.path.join(APPS_DIR, app_name)
-
-        # Check for existing installation
-        if os.path.exists(target_dir):
-            print(f"Error: An app named '{app_name}' is already installed.")
-            return
-
-        # Extract the .tear package
-        shutil.unpack_archive(app_package_path, target_dir) 
-
-        print(f"App '{app_name}' installed successfully!")
-
-    except Exception as e:
-        print(f"Error installing app: {e}")
-
-
-
-
-def download_app():  # Renamed function
     pass
     print("installing apps isnt supported anymore for 1.3 series...")
 
+def install_app():
+    app_name = input("Enter the name of the app to install: ")
+    try:
+        response = requests.get(f"{GITHUB_REPO}/{app_name}")
+        response.raise_for_status()
+        app_data = response.json()
+        download_url = app_data['download_url']
+        # Download the app (you'll need to implement the download logic)
+        # ... (Download code)
+        print(f"App '{app_name}' downloaded successfully!")
+        # Extract the app (you'll need to implement the extraction logic)
+        # ... (Extraction code)
+        print(f"App '{app_name}' installed successfully!")
+    except requests.exceptions.RequestException as e:
+        print(f"Error installing app: {e}")
 
 def update_apps():
     print("Updating apps...")
+    # Implement logic to check for updates and update apps
+    # ... (Update code)
     print("Apps updated successfully!")
-
-def install_app():
-    pass
-    
 
 # --- Login/Signup ---
 def login():
     username = input("Username: ")
     password = input("Password: ")
-
 # --- Time zone selection ---
 def choose_timezone():
     timezones = pytz.common_timezones
     print("Available Time Zones:")
     for i, tz in enumerate(timezones):
         print(f"{i+1}. {tz}")
-
-    def get_input(queue):
-        while True:
+    while True:
+        try:
+            choice = int(input("Enter the number of your time zone: "))
+            if 1 <= choice <= len(timezones):
+                return timezones[choice - 1]
+            else:
+                print("Invalid choice. Please enter a number from the list.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+        def get_input(queue):
+         while True:
             try:
                 choice = int(input("Enter the number of your time zone: "))
                 queue.put(choice)
@@ -373,7 +347,7 @@ def choose_timezone():
     input_thread = threading.Thread(target=get_input, args=(input_queue,))
     input_thread.daemon = True  # Allow main thread to exit even if input thread is running
     input_thread.start()
-
+    
     while True:
         if not input_queue.empty():
             choice = input_queue.get()
@@ -409,98 +383,46 @@ def print_help():
     print("- mkdir [directory_name]: Create a new directory.")
     print("- touch [file_name]: Create a new file.")
     print("- rm [item_name]: Remove a file or directory.")
-    print("- install [app_package.tear]: Install an app from a .tear package.")
 
-def run_app(app_name):
-    """Runs an app based on the current run mode setting."""
-    global settings
-
-    if settings["run_mode"] == "built-in" and app_name in apps:
-    
-        apps[app_name].run()  # Run built-in function directly
-    else:
-        # Assume .tear app if not in built-in mode or not found in 'apps'
-        app_dir = os.path.join(APPS_DIR, app_name)
-        app_info_path = os.path.join(app_dir, "app_info.json")
-
-        try:
-            with open(app_info_path, "r") as f:
-                app_info = json.load(f)
-
-            entry_point = app_info.get("entry_point")
-            if not entry_point:
-                print("Error: App does not specify an entry point.")
-                return
-
-            app_process = subprocess.Popen(
-                ["python", os.path.join(app_dir, entry_point)],
-                cwd=app_dir
-            )
-
-        except (FileNotFoundError, json.JSONDecodeError, subprocess.CalledProcessError) as e:
-            print(f"Error running app: {e}")
 
 def list_apps():
-    """Lists all available apps, considering the run mode."""
-    global settings
-
-    if settings["run_mode"] == "built-in":
-        print("Built-in Apps:")
-        for app_name in apps:
-            print(f"- {app_name}: {apps[app_name].description}")
-    else:  # "tear" mode
-        print("Installed .tear Apps:")
-        if os.path.exists(APPS_DIR):
-            for app_folder in os.listdir(APPS_DIR):
-                app_info_path = os.path.join(APPS_DIR, app_folder, "app_info.json")
-                if os.path.exists(app_info_path):
-                    with open(app_info_path, "r") as f:
-                        app_info = json.load(f)
-                        print(f"- {app_info['name']}: {app_info['description']}")
-                else:
-                    print(f"- {app_folder}: (App information not available)")
-        else:
-            print("No .tear apps installed.")
-# --- Settings ---
-def change_settings():
-    """Allows the user to change TearOS settings."""
-    global settings  # Add this line to declare settings as global
-
-    settings = load_settings()  # Load settings at the beginning of the function
-    while True:
-        print("\nTearOS Settings:")
-        print("1. App Run Mode:", settings["run_mode"])
-        print("2. Back to TearOS")
-
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            print("\nApp Run Modes:")
-            print("1. Built-in (run apps directly)")
-            print("2. .tear (run apps from .tear packages)")
-
-            mode_choice = input("Enter your choice: ")
-            if mode_choice == "1":
-                settings["run_mode"] = "built-in"
-                print("App run mode set to 'built-in'.")
-            elif mode_choice == "2":
-                settings["run_mode"] = "tear"
-                print("App run mode set to '.tear'.")
+    apps_dir = "/tearOS/apps"  # Path to your apps directory
+    if os.path.exists(apps_dir):
+        print("Available Apps:")
+        for app_folder in os.listdir(apps_dir):
+            app_info_path = os.path.join(apps_dir, app_folder, "app_info.json")
+            if os.path.exists(app_info_path):
+                with open(app_info_path, "r") as f:
+                    app_info = json.load(f)
+                    print(f"- {app_info['name']}: {app_info['description']}")
             else:
-                print("Invalid choice.")
-        elif choice == "2":
-            save_settings(settings)
-            break
-        else:
-            print("Invalid choice.")
+                print(f"- {app_folder}: (App information not available)")
+    else:
+        print("App directory not found.")
 
+def run_app(app_name):
+    apps_dir = "/tearOS/apps"
+    app_folder = os.path.join(apps_dir, app_name)
+    if os.path.exists(app_folder):
+        app_info_path = os.path.join(app_folder, "app_info.json")
+        if os.path.exists(app_info_path):
+            with open(app_info_path, "r") as f:
+                app_info = json.load(f)
+                entry_point = app_info['entry_point']
+                # Execute the app using the entry point (e.g., with os.system or subprocess)
+                os.system(f"python {os.path.join(app_folder, entry_point)}") 
+        else:
+            print("App information file not found.")
+    else:
+        print("App not found.")
+
+# --- Main OS Loop ---
+# ... (rest of your code)
 
 # --- Main OS Loop ---
 def main():
-    global username, dir, user_tz, settings, current_theme  # user_tz is not used anymore
+    global username, dir, user_tz  # user_tz is not used anymore
     user_data = load_user_data()
-    settings = load_settings()
-    current_theme = "default"  # Initialize the theme
 
     logged_in = False # Flag to track login status
 
@@ -518,6 +440,7 @@ def main():
                 break
             elif username in user_data:
                 print("Incorrect password.")
+
             else:
                 print("Invalid username or password.")
         elif choice == "2":
@@ -527,10 +450,15 @@ def main():
                 print("Username already exists.")
             else:
                 user_data[username] = password
+                # --- Time zone removed ---
+                # user_tz = pytz.timezone(choose_timezone())
+                # user_data[username + "_timezone"] = user_tz.zone  # Store time zone
                 save_user_data(user_data)
                 print(f"Account created successfully, {username}!")
                 logged_in = True # Set flag to True after account creation
                 break # Exit the loop after successful account creation
+
+            
         else:
             print("Invalid choice.")
 
@@ -538,10 +466,13 @@ def main():
     print(f"Welcome to {osname}!, {username}!")
     print("Type 'help' for a list of commands!")
 
-    # MAIN OS LOOP
-    while True:
+    
+
+
+    # MAIN OS LOOP (This loop was missing)
+    while True: 
         prompt = f"{username}@{osname}:{'/'.join(current_dir)} $"
-        prompt = f"{themes[current_theme].prompt_color}{prompt}{themes[current_theme].text_color}"  # Apply theme color
+        prompt = f"\033[32m{prompt}\033[0m"  # Apply green color and reset
 
         command = input(prompt)
 
@@ -567,33 +498,20 @@ def main():
             create_file(command.split()[1])
         elif command.startswith("rm"):
             remove(command.split()[1])
-        elif command == "appstore":
-            app_store.run()
-        elif command == "settings":
-            change_settings()
-        elif command.startswith("theme"):  # Add the theme command
-            parts = command.split(" ", 1)
-            if len(parts) == 2:
-                change_theme(parts[1])
-            else:
-                print("Invalid command. Usage: theme [theme_name]")
         elif command in apps:
             run_app(command)
         elif command == "exit":
             print("Exiting TearOS...")
-            save_file_system()
             break # Exit the OS loop
         elif command == "logout":
             print("Logging out...")
-            save_file_system()
-            logged_in = False  # Reset the login status
             break  # Exit the OS loop, going back to login/signup
         elif command.startswith("install"):
             parts = command.split(" ", 1)
             if len(parts) == 2:
-                extract_app(parts[1])
+                install_app(parts[1])
             else:
-                print("Invalid command. Usage: install [app_package.tear]")
+                print("Invalid command. Usage: install [app_package.tear]") 
         else:
             print("Invalid command.")
 

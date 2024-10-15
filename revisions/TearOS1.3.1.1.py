@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 # --- Configuration ---
-GITHUB_REPO = "https://api.github.com/repos/your-username/tear-os/contents/apps"
+
 APPS_DIR = "/tearOS/apps"
 FILE_SYSTEM_DATA_FILE = "file_system_data.json"  # File to store file system data
 SETTINGS_FILE = "tearOS_settings.json"
@@ -276,36 +276,12 @@ apps = {
 
 # --- Functions to list, install, and update apps ---
 def list_available_apps():
-    try:
-        response = requests.get(GITHUB_REPO)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        apps_data = response.json()
-        print("Available Apps:")
-        for app in apps_data:
-            print(f"- {app['name']}: {app['description']}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching app data: {e}")
+    pass
+    print("tearOS 1.3 series has stopped recieving support.....go to 1.4...")
 
 def install_app():
-    app_name = input("Enter the name of the app to install: ")
-    try:
-        response = requests.get(f"{GITHUB_REPO}/{app_name}")
-        response.raise_for_status()
-        app_data = response.json()
-        download_url = app_data['download_url']
-
-        # Download the app
-        response = requests.get(download_url)
-        response.raise_for_status()
-        with open(f"{app_name}.tear", "wb") as f:
-            f.write(response.content)
-        print(f"App '{app_name}' downloaded successfully!")
-
-        # Extract the app
-        install_app(f"{app_name}.tear")
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error installing app: {e}")
+    pass
+    print("installing apps isnt supported anymore for 1.3 series...")
 
 def update_apps():
     print("Updating apps...")
