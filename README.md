@@ -5,7 +5,7 @@ Made apps built-in, user data save in a json (and inside the py file) and added 
 1. Login
 2. Create a Account
 
-##Did the line that says your username and your directory changed?
+## Did the line that says your username and your directory changed?
  Yes, it changed to {username}@TearOS beta 1.3.1:home $
 
 ## Flaws
