@@ -1,0 +1,8 @@
+{
+  "name": "MyGame",
+  "description": "A fun and exciting game for TearOS!",
+  "version": "1.0.0",
+  "author": "AlejandrixDev",
+  "entry_point": "game.py", 
+  "icon": "icon.png"  
+}
