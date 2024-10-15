@@ -13,6 +13,20 @@ import subprocess
 import sys
 import psutil
 
+def uninstall_app(app_name):
+    """Uninstalls a .tear app."""
+    target_dir = os.path.join(APPS_DIR, app_name)
+
+    if os.path.exists(target_dir):
+        try:
+            shutil.rmtree(target_dir)  # Delete the app's directory
+            print(f"App '{app_name}' uninstalled successfully!")
+        except OSError as e:
+            print(f"Error uninstalling app: {e}")
+    else:
+        print(f"App '{app_name}' not found.")
+
+
 # --- Command History ---
 command_history = []
 command_history_list = []
@@ -194,7 +208,7 @@ def save_user_data(user_data):
         json.dump(user_data, f)
 
 # --- Global Settings ---
-osname = "TearOS beta 1.3.1.3"
+osname = "TearOS beta 1.4"
 default_dir = "home"
 user_tz = None  # Will be set during login
 
@@ -441,7 +455,7 @@ def choose_timezone():
 
 def get_current_time():
     if user_tz:
-        return datetime.now(user_tz).strftime("%H:%M:%S")
+        return datetime.now(user_tz).user_tzinfo.tzname(datetime.now())
     else:
         return "Time zone not set."
 
@@ -551,6 +565,7 @@ def change_settings():
 
 
 # --- Main OS Loop ---
+# --- Main OS Loop ---
 def main():
     global username, dir, user_tz, settings, current_theme  # user_tz is not used anymore
     user_data = load_user_data()
@@ -637,6 +652,7 @@ def main():
                 change_theme(parts[1])
             else:
                 print("Invalid command. Usage: theme [theme_name]")
+                
         elif command in apps:
             run_app(command)
         elif command == "exit":
@@ -654,6 +670,12 @@ def main():
                 extract_app(parts[1])
             else:
                 print("Invalid command. Usage: install [app_package.tear]")
+        elif command.startswith("uninstall"): # This is the code you're looking for
+            parts = command.split(" ", 1)
+            if len(parts) == 2:
+                uninstall_app(parts[1])
+            else:
+                print("Invalid command. Usage: uninstall [app_name]")
         else:
             print("Invalid command.")
 
