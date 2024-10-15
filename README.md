@@ -1,4 +1,4 @@
-# 1: TearOS 1.3.1
+# 1: TearOS 1.3.1.1
 ![The Logo](https://github.com/cWorksLLC/tear-os/blob/main/tear-logo.png)
 ## The changes made
 Made apps built-in, user data save in a json (and inside the py file) and added options to login script like:
