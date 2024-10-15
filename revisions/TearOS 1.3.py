@@ -1,7 +1,7 @@
+# THIS IS THE ORIGINAL REPO TEAROS FILE, ITS RECOMMENDED TO USE THE 1.3.1 , 1.3.1.1 OR THE LATEST
 import time
 from datetime import datetime, date
 import pytz
-
 # Time zone selection
 def choose_timezone():
     print("Please choose your time zone:")
