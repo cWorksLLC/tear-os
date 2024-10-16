@@ -12,6 +12,22 @@ import shutil
 import subprocess
 import sys
 import psutil
+from blessed import Terminal
+
+term = Terminal()
+
+with term.fullscreen():
+    while True:
+        with term.location(0, 0):
+            print(term.clear())  # Clear the screen
+            print("My TUI App")
+            # ... draw other UI elements ...
+
+        key = term.inkey()
+        if key.is_sequence:
+            if key.name == 'KEY_ESCAPE':
+                break  # Exit on Escape key
+        # ... handle other keys ...
 
 def uninstall_app(app_name):
     """Uninstalls a .tear app."""
@@ -606,6 +622,17 @@ def app_profiling():
         else:
             print("Invalid choice.")
 
+def find_file(search_term, start_dir=None):
+    """Recursively searches for files containing the search term."""
+    if start_dir is None:
+        start_dir = file_system  # Start from the root
+
+    for item in start_dir:
+        item_path = os.path.join(*current_dir, item)  # Get full path
+        if search_term.lower() in item.lower():
+            print(item_path)
+        if isinstance(start_dir[item], dict):  # Recurse into subdirectories
+            find_file(search_term, start_dir[item]) 
 
 
 # --- Main OS Loop ---
