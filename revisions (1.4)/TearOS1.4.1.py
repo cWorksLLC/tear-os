@@ -12,6 +12,16 @@ import shutil
 import subprocess
 import sys
 import psutil
+import time 
+
+import time
+
+start_time = time.time()
+# Run the app code here
+end_time = time.time()
+
+execution_time = end_time - start_time
+print(f"App execution time: {execution_time} seconds")
 
 def uninstall_app(app_name):
     """Uninstalls a .tear app."""

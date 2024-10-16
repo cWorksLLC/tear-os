@@ -482,32 +482,36 @@ def print_help():
     print("- install [app_package.tear]: Install an app from a .tear package.")
 
 def run_app(app_name):
-    """Runs an app based on the current run mode setting."""
     global settings
 
-    if settings["run_mode"] == "built-in" and app_name in apps:
-    
-        apps[app_name].run()  # Run built-in function directly
-    else:
-        # Assume .tear app if not in built-in mode or not found in 'apps'
-        app_dir = os.path.join(APPS_DIR, app_name)
-        app_info_path = os.path.join(app_dir, "app_info.json")
+    app_dir = os.path.join(APPS_DIR, app_name)
+    app_info_path = os.path.join(app_dir, "app_info.json")
 
-        try:
-            with open(app_info_path, "r") as f:
-                app_info = json.load(f)
+    try:
+        with open(app_info_path, "r") as f:
+            app_info = json.load(f)
 
-            entry_point = app_info.get("entry_point")
-            if not entry_point:
-                print("Error: App does not specify an entry point.")
+        entry_point = app_info.get("entry_point")
+        if not entry_point:
+            print("Error: App does not specify an entry point.")
 
-            app_process = subprocess.Popen(
-                ["python", os.path.join(app_dir, entry_point)],
-                cwd=app_dir
-            )
+        start_time = time.time()  # Start timing
+        app_process = subprocess.Popen(
+            ["python", os.path.join(app_dir, entry_point)],
+            cwd=app_dir
+        )
+        app_process.wait()  # Wait for the app to finish
+        end_time = time.time()  # Stop timing
 
-        except (FileNotFoundError, json.JSONDecodeError, subprocess.CalledProcessError) as e:
-            print(f"Error running app: {e}")
+        execution_time = end_time - start_time
+        print(f"App execution time: {execution_time} seconds")
+
+        # Update app profile in settings
+        settings["app_profiles"][app_name] = execution_time
+        save_settings(settings)
+
+    except (FileNotFoundError, json.JSONDecodeError, subprocess.CalledProcessError) as e:
+        print(f"Error running app: {e}")
 
 def list_apps():
     """Lists all available apps, considering the run mode."""
@@ -539,7 +543,8 @@ def change_settings():
     while True:
         print("\nTearOS Settings:")
         print("1. App Run Mode:", settings["run_mode"])
-        print("2. Back to TearOS")
+        print("2. App Profiling")
+        print("3. Back to TearOS")
 
         choice = input("Enter your choice: ")
 
@@ -558,7 +563,45 @@ def change_settings():
             else:
                 print("Invalid choice.")
         elif choice == "2":
+            pass
+            app_profiling()
+        elif choice == "3":
             save_settings(settings)
+            break
+        else:
+            print("Invalid choice.")
+
+# --- App Profiling ---
+def app_profiling():
+    """Allows the user to view and manage app profiling data."""
+    global settings
+
+    settings = load_settings()  # Load settings at the beginning of the function
+    while True:
+        print("\nApp Profiling:")
+        print("1. View App Profiles")
+        print("2. Clear App Profiles")
+        print("3. Back to Settings")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            if "app_profiles" in settings:
+                if settings["app_profiles"]:
+                    print("\nApp Profiles:")
+                    for app_name, execution_time in settings["app_profiles"].items():
+                        print(f"- {app_name}: {execution_time} seconds")
+                else:
+                    print("No app profiles available.")
+            else:
+                print("App profiling is not enabled.")
+        elif choice == "2":
+            if "app_profiles" in settings:
+                settings["app_profiles"] = {}
+                print("App profiles cleared.")
+            else:
+                print("App profiling is not enabled.")
+        elif choice == "3":
             break
         else:
             print("Invalid choice.")

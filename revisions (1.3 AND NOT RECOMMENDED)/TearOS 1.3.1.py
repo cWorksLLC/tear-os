@@ -1,3 +1,4 @@
+import subprocess
 import time
 from datetime import datetime, date
 import pytz
@@ -6,6 +7,8 @@ import calendar
 import os
 import threading
 import queue
+
+from TearOSmanager import APPS_DIR
 # --- File System ---
 file_system = {
     "root": {
@@ -276,12 +279,40 @@ def list_apps():
         print(f"- {app_name}: {apps[app_name].description}")
 
 def run_app(app_name):
-    global apps  # Tell Python to use the global apps variable
-    if app_name in apps:
-        apps[app_name].run()
-    else:
-        print("App not found.")
+    global settings
 
+    app_dir = os.path.join(APPS_DIR, app_name)
+    app_info_path = os.path.join(app_dir, "app_info.json")
+
+    try:
+        with open(app_info_path, "r") as f:
+            app_info = json.load(f)
+
+        entry_point = app_info.get("entry_point")
+        if not entry_point:
+            print("Error: App does not specify an entry point.")
+
+        start_time = time.time()  # Start timing
+        app_process = subprocess.Popen(
+            ["python", os.path.join(app_dir, entry_point)],
+            cwd=app_dir
+        )
+        app_process.wait()  # Wait for the app to finish
+        end_time = time.time()  # Stop timing
+
+        execution_time = end_time - start_time
+        print(f"App execution time: {execution_time} seconds")
+
+        # Update app profile in settings
+        settings["app_profiles"][app_name] = execution_time
+        save_settings(settings)
+
+    except (FileNotFoundError, json.JSONDecodeError, subprocess.CalledProcessError) as e:
+        print(f"Error running app: {e}")
+
+def save_settings():
+    pass
+    
 # --- Main OS Loop ---
 # ... (rest of your code)
 

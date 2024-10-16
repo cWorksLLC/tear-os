@@ -1,3 +1,7 @@
 {
-    "run_mode": "built-in" 
+  "run_mode": "built-in",
+  "app_profiles": {
+    "calculator": 0.023,
+    "guess": 1.54
+  }
 }
