@@ -607,7 +607,7 @@ def app_profiling():
             print("Invalid choice.")
 
 
-# --- Main OS Loop ---
+
 # --- Main OS Loop ---
 def main():
     global username, dir, user_tz, settings, current_theme  # user_tz is not used anymore
