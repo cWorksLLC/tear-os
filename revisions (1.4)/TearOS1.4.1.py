@@ -372,6 +372,11 @@ def search_apps(search_term):
 
     if not matching_apps:
         print("No matching apps found.")
+    else:
+        print("Matching Apps:")
+        for app_name, app_description, category in matching_apps:
+            print(f"- {app_name}: {app_description} (Category: {category})")
+
 
 # --- Create app instances ---
 calculator = App("calculator", "A simple calculator", "calculator", app_calculator)
@@ -395,6 +400,12 @@ def list_available_apps():
     if not app_store_data:
         print("No apps found in the app store.")
         return
+
+    print("Available Apps:")
+    for category, apps in app_store_data.items():
+        print(f"\nCategory: {category}")
+        for app_name, app_description in apps.items():
+            print(f"- {app_name}: {app_description}") 
 
 def extract_app(app_package_path):
     """Installs a .tear app package to the APPS_DIR."""
