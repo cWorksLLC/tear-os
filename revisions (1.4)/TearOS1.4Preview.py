@@ -32,7 +32,7 @@ command_history = []
 command_history_list = []
 
 # --- Configuration ---
-GITHUB_REPO = "https://api.github.com/repos/Alejandrix2456github/tear-os-apps-extras/contents/tearOS/apps"
+GITHUB_REPO = "https://api.github.com/repos/Alejandrix2456github/tearOS/contents/tearOS/apps"
 APPS_DIR = "/tearOS/apps"
 FILE_SYSTEM_DATA_FILE = "file_system_data.json"  # File to store file system data
 SETTINGS_FILE = "tearOS_settings.json"
