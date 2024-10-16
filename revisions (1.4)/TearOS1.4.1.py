@@ -312,25 +312,66 @@ def app_calendar():
 def app_store():
     print("Welcome to the TearOS App Store!")
     while True:
-        print("1. List Available Apps")
-        print("2. Install App")
-        print("3. Update Apps")
-        print("4. Back to TearOS")
+        print("\n1. List Available Apps")
+        print("2. Search Apps")
+        print("3. Install App")
+        print("4. Update Apps")
+        print("5. Back to TearOS")
         choice = input("Enter your choice: ")
 
         if choice == "1":
             list_available_apps()
         elif choice == "2":
-            download_app()
+            search_term = input("Enter search term: ")
+            search_apps(search_term)
         elif choice == "3":
-            update_apps()
+            download_app()
         elif choice == "4":
+            update_apps()
+        elif choice == "5":
             break
         else:
             print("Invalid choice.")
             
+def load_app_store_data():
+    """Loads app data from the GitHub repository and categorizes them."""
+    global app_store_data
+    try:
+        response = requests.get(GITHUB_REPO)
+        response.raise_for_status()
+        apps_data = response.json()
 
+        app_store_data = {}  # Reset the data
+        for app in apps_data:
+            app_name = app['name']
+            app_description = app.get('description', 'No description available')
+            app_category = app.get('category', 'Uncategorized')  # Get category
 
+            # If the category doesn't exist, create it
+            if app_category not in app_store_data:
+                app_store_data[app_category] = {}
+
+            app_store_data[app_category][app_name] = app_description
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching app data: {e}")
+
+def search_apps(search_term):
+    """Searches for apps by name or description."""
+    load_app_store_data()
+    if not app_store_data:
+        print("No apps found in the app store.")
+        return
+
+    matching_apps = []
+    for category, apps in app_store_data.items():
+        for app_name, app_description in apps.items():
+            if (search_term.lower() in app_name.lower() or 
+                search_term.lower() in app_description.lower()):
+                matching_apps.append((app_name, app_description, category))
+
+    if not matching_apps:
+        print("No matching apps found.")
 
 # --- Create app instances ---
 calculator = App("calculator", "A simple calculator", "calculator", app_calculator)
@@ -349,15 +390,11 @@ apps = {
 
 # --- Functions to list, install, and update apps ---
 def list_available_apps():
-    try:
-        response = requests.get(GITHUB_REPO)
-        response.raise_for_status()
-        apps_data = response.json()
-        print("Available Apps:")
-        for app in apps_data:
-            print(f"- {app['name']}: {app.get('description', 'No description available')}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching app data: {e}")
+    """Lists available apps by category."""
+    load_app_store_data()  # Reload data to reflect any changes
+    if not app_store_data:
+        print("No apps found in the app store.")
+        return
 
 def extract_app(app_package_path):
     """Installs a .tear app package to the APPS_DIR."""
