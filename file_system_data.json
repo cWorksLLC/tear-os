@@ -1,0 +1,16 @@
+{
+    "root": {
+        "home": {
+            "user": {
+                "documents": {},
+                "downloads": {},
+                "pictures": {},
+                "music": {},
+                "myfile.txt": "This is the content of my file."
+            }
+        },
+        "bin": {},
+        "etc": {},
+        "tearApps": {}
+    }
+}
